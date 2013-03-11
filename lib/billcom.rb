@@ -1,7 +1,6 @@
 require "billcom/version"
 require 'nokogiri'
 require 'httparty'
-require 'singleton'
 
   URL = "https://api.bill.com/crudApi"
   CONTENT_TYPE = "application/x-www-form-urlencoded"
@@ -200,7 +199,6 @@ module Billcom
 
   def self.post_request(nokogiri_xml)
     response = HTTParty.post(URL, create_options(nokogiri_xml))
-    p response
     check_status(response)
     response
   end

@@ -1,5 +1,6 @@
 *.gem
 *.rbc
+lib/.billcom.rb.swp
 *.swp
 *.gem
 .bundle
