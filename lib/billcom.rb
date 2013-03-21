@@ -8,7 +8,7 @@ require 'httparty'
 module Billcom
 
   def self.options(opt)
-    @user = opt[:user]
+    @username = opt[:username]
     @pw = opt[:password]
     @org = opt[:org_id]
     @api = opt[:api_key]
@@ -19,7 +19,7 @@ module Billcom
       xml.request(:version => "1.0", :applicationkey => @api) {
         xml.login {
         xml.username {
-        xml.cdata @user
+        xml.cdata @username
       }
       xml.password {
         xml.cdata @pw
@@ -34,7 +34,8 @@ module Billcom
     @@session_id = Nokogiri::XML(login_response.body).child.search("//sessionId").first.text
   end
 
-  def self.create_vendor(name, email, external_id)
+    # address in the form of { :address1 => "123 Abbey Road", :address2 => "Apt C", :city => "San Francisco", :state => "CA", :country => "United States", :zip => "94608" }
+  def self.create_vendor(name, email, external_id, address, tax_id)
     vendor = Nokogiri::XML::Builder.new do |xml|
       xml.request(:version => "1.0", :applicationkey => @api) {
         xml.operation(:sessionId => @@session_id) {
@@ -45,6 +46,27 @@ module Billcom
       }
       xml.track1099 {
         xml.cdata "1"
+      }
+      xml.taxId {
+        xml.cdata tax_id
+      }
+      xml.address1 {
+        xml.cdata address[:address1]
+      }
+      xml.address2 {
+        xml.cdata address[:address2]
+      }
+      xml.addressCity {
+        xml.cdata address[:city]
+      }
+      xml.addressState {
+        xml.cdata address[:state]
+      }
+      xml.addressCountry {
+        xml.cdata address[:country]
+      }
+      xml.addressZip {
+        xml.cdata address[:zip]
       }
       xml.externalId {
         xml.cdata external_id
@@ -80,6 +102,32 @@ module Billcom
     invite_response = post_request(invite)
     vendor_invite_id = get_id(invite_response)
     vendor_invite_id
+  end
+
+  def self.get_vendor(vendor_id)
+    vendor = Nokogiri::XML::Builder.new do |xml|
+      xml.request(:version => "1.0", :applicationkey => @api) {
+        xml.operation(:sessionId => @@session_id) {
+        xml.get_list(:object =>"vendor") {
+        xml.filter {
+        xml.expression {
+        xml.field {
+          xml.cdata "id"
+        }
+        xml.operator {
+          xml.cdata "="
+        }
+        xml.value {
+          xml.cdata vendor_id
+        }
+      }
+      }
+      }
+      }
+      }
+    end
+    get_vendor_response = post_request(vendor)
+    p get_vendor_response 
   end
 
   def self.create_bill(invoice_number, vendor_id, amount, chart_of_account_id, external_id, invoice_date, due_date)
