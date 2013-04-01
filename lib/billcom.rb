@@ -174,6 +174,38 @@ module Billcom
     bill_id
   end
 
+  def self.create_offline_payment(bill_id, amount, chart_of_account_id, process_date)
+    offline_bill = Nokogiri::XML::Builder.new do |xml|
+      xml.request(:version => "1.0", :applicationkey => @api) {
+        xml.operation(:sessionId => @@session_id) {
+        xml.create_offlinepayment {
+        xml.billId {
+          xml.cdata bill_id
+        }
+        xml.amount {
+          xml.cdata amount
+        }
+        xml.processDate {
+          xml.cdata process_date
+        }
+        xml.chartOfAccountId {
+          xml.cdata chart_of_account_id
+        }
+        xml.toPrintCheck {
+          xml.cdata "0"
+        }
+        xml.allowExport {
+          xml.cdata "1"
+        }
+      }
+      }
+      }
+    end
+    offline_bill_response = post_request(offline_bill)
+    offline_bill_id = get_id(offline_bill_response)
+    offline_bill_id
+  end
+
   def self.pay_bill(bill_id, amount, process_date)
     payment = Nokogiri::XML::Builder.new do |xml|
       xml.request(:version => "1.0", :applicationkey => @api) {
