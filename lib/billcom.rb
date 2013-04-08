@@ -80,7 +80,12 @@ module Billcom
       }
     end
     create_vendor_response = post_request(vendor)
+    begin
     vendor_id = get_id(create_vendor_response)
+    rescue e
+      p create_vendor_response
+      raise e
+    end
     vendor_id
   end
 
