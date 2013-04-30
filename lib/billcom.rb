@@ -279,7 +279,12 @@ module Billcom
   private
 
   def self.get_id(response)
-    Nokogiri::XML(response.body).child.search("//id").first.text
+    begin
+      Nokogiri::XML(response.body).child.search("//id").first.text
+    rescue
+      error = Nokogiri::XML(response.body).child.search("//errormessage").first.text
+      raise error
+    end
   end
 
   def self.post_request(nokogiri_xml)
