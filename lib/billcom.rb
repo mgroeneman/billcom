@@ -283,7 +283,11 @@ module Billcom
       Nokogiri::XML(response.body).child.search("//id").first.text
     rescue
       error = Nokogiri::XML(response.body).child.search("//errormessage").first.text
-      raise error
+      if error.include("CVUSER.UKVENDOREXTID")
+        break
+      else
+        raise error
+      end
     end
   end
 
