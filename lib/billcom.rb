@@ -7,6 +7,8 @@ require 'httparty'
 
 module Billcom
 
+  class DuplicateUserError < StandardError; end
+
   def self.options(opt)
     @username = opt[:username]
     @pw = opt[:password]
@@ -83,8 +85,7 @@ module Billcom
     begin
     vendor_id = get_id(create_vendor_response)
     rescue
-      p create_vendor_response
-      raise
+      raise DuplicateUserError
     end
     vendor_id
   end
@@ -285,6 +286,8 @@ module Billcom
       error = Nokogiri::XML(response.body).child.search("//errormessage").first.text
       unless error.include?("CVUSER.UKVENDOREXTID")
         raise error
+      else 
+        raise 
       end
     end
   end
